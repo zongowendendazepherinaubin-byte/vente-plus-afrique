@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#123c32">
+<title>VendrePlus Afrique — V2</title>
+<style>
+:root{--green:#123c32;--green2:#1e6b50;--lime:#d8f36a;--cream:#f7f5ed;--ink:#18231f;--muted:#68736e;--line:#e3e7df;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:var(--green);color:white;padding:22px 18px 26px;border-radius:0 0 26px 26px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px}.logo{font-weight:850;font-size:19px;letter-spacing:-.4px}.logo span{color:var(--lime)}.tag{font-size:11px;border:1px solid #ffffff55;border-radius:20px;padding:6px 9px;color:#e9f4ed;white-space:nowrap}
+h1{font-size:27px;line-height:1.13;letter-spacing:-.8px;margin:26px 0 9px;max-width:380px}header p{color:#d7e4dd;font-size:14px;line-height:1.5;margin:0;max-width:460px}
+main{max-width:760px;margin:auto;padding:18px 14px 40px}.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}.tab{border:1px solid var(--line);background:white;border-radius:13px;padding:11px 5px;font-size:12px;font-weight:750;color:var(--muted)}.tab.active{background:var(--lime);color:var(--green);border-color:var(--lime)}
+.card{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px;box-shadow:0 4px 18px #122d1b08}.eyebrow{text-transform:uppercase;letter-spacing:1px;color:var(--green2);font-size:10px;font-weight:850}.card h2{font-size:19px;margin:6px 0;letter-spacing:-.4px}.desc{font-size:13px;color:var(--muted);line-height:1.5;margin:0 0 15px}
+label{display:block;font-size:12px;font-weight:750;margin:12px 0 6px}input,select,textarea{width:100%;border:1px solid #dce3da;border-radius:11px;padding:12px;font:inherit;font-size:14px;background:#fff;color:var(--ink)}textarea{min-height:86px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{width:100%;border:0;border-radius:12px;padding:13px 14px;font:inherit;font-weight:800;background:var(--green);color:#fff;margin-top:14px;cursor:pointer}.btn.secondary{background:#edf3e9;color:var(--green);border:1px solid #dce8d9}.btn:disabled{opacity:.5}
+.result{background:#f4f8ee;border:1px solid #dce9d3;border-radius:13px;padding:13px;margin-top:14px;white-space:pre-wrap;font-size:14px;line-height:1.6;display:none}.small{font-size:11px;color:var(--muted);line-height:1.5}.money{font-size:25px;font-weight:850;letter-spacing:-.7px}.money-label{font-size:12px;color:var(--muted)}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.metric{background:#f7f8f3;border-radius:13px;padding:13px}.hidden{display:none!important}.notice{font-size:12px;background:#fff7df;border:1px solid #f1dfaa;border-radius:12px;padding:12px;line-height:1.5;color:#5d4a19}.pill{display:inline-block;background:#edf5e7;color:#28563c;border-radius:20px;padding:5px 8px;font-size:10px;font-weight:800;margin-bottom:6px}
+.product{border:1px solid var(--line);border-radius:13px;padding:12px;margin-top:10px}.product-top{display:flex;justify-content:space-between;gap:10px;align-items:start}.product strong{display:block}.product small{color:var(--muted)}.delete{border:1px solid #e5caca;background:#fff4f4;color:#8a3030;border-radius:9px;padding:6px 9px;font-weight:700}
+footer{text-align:center;padding:8px 18px 28px;color:var(--muted);font-size:11px}
+@media(min-width:600px){header{padding:28px max(24px,calc((100vw - 680px)/2)) 32px}h1{font-size:34px}main{padding-top:24px}}
+@media(max-width:390px){.tabs{gap:5px}.tab{font-size:11px;padding:10px 2px}.row{gap:8px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="top"><div class="logo">VendrePlus <span>Afrique</span></div><div class="tag">VERSION TEST • V2</div></div>
+  <h1>Vends mieux. Garde le contrôle de tes bénéfices.</h1>
+  <p>Prépare tes annonces, calcule tes marges et garde une petite liste de tes produits — directement sur ton téléphone.</p>
+</header>
+<main>
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="annonce">✍️ Annonce</button>
+    <button class="tab" data-tab="marge">💰 Marge</button>
+    <button class="tab" data-tab="produits">📦 Produits</button>
+    <button class="tab" data-tab="assistant">💡 Conseils</button>
+    <button class="tab" data-tab="plan">🌍 Projet</button>
+  </div>
+
+  <section id="annonce" class="panel">
+    <div class="card">
+      <div class="eyebrow">Assistant de vente</div><h2>Prépare une annonce</h2>
+      <p class="desc">Crée un texte à copier vers WhatsApp, Facebook ou TikTok. Relis toujours les informations avant publication.</p>
+      <label for="product">Nom du produit</label><input id="product" placeholder="Ex. chaussures, jus naturel, pagne">
+      <div class="row"><div><label for="price">Prix (FCFA)</label><input id="price" type="number" min="0" placeholder="Ex. 7500"></div><div><label for="audience">Clientèle</label><select id="audience"><option>Tout public</option><option>Femmes</option><option>Hommes</option><option>Jeunes</option><option>Parents</option><option>Professionnels</option></select></div></div>
+      <label for="benefit">Avantage principal</label><input id="benefit" placeholder="Ex. confortable, durable, fait localement">
+      <label for="contact">Contact ou livraison (facultatif)</label><input id="contact" placeholder="Ex. livraison à Ouaga, WhatsApp…">
+      <button class="btn" id="generate">Créer mon annonce</button>
+      <div class="result" id="adResult" aria-live="polite"></div>
+      <button class="btn secondary hidden" id="copyAd">Copier l'annonce</button>
+      <p class="small">Cette fonction utilise un modèle intégré, pas une IA connectée. Elle ne publie rien automatiquement.</p>
+    </div>
+  </section>
+
+  <section id="marge" class="panel hidden">
+    <div class="card">
+      <div class="eyebrow">Calculateur</div><h2>Calcule ton bénéfice</h2>
+      <p class="desc">Les autres frais sont comptés <b>par article</b>. Si tu as des frais uniques pour toute la commande, divise-les par le nombre d'articles avant de les saisir.</p>
+      <label for="cost">Coût d'achat par article (FCFA)</label><input id="cost" type="number" min="0" placeholder="Ex. 4000">
+      <div class="row"><div><label for="sale">Prix de vente par article (FCFA)</label><input id="sale" type="number" min="0" placeholder="Ex. 7500"></div><div><label for="fees">Autres frais par article (FCFA)</label><input id="fees" type="number" min="0" value="0"></div></div>
+      <label for="quantity">Nombre d'articles vendus</label><input id="quantity" type="number" min="1" step="1" value="1">
+      <button class="btn" id="calculate">Calculer ma marge</button>
+      <div class="result" id="marginResult" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section id="produits" class="panel hidden">
+    <div class="card">
+      <div class="eyebrow">Petit catalogue local</div><h2>Enregistre tes produits</h2>
+      <p class="desc">Garde le nom, le coût et le prix de vente de tes articles sur ce téléphone.</p>
+      <label for="pName">Nom du produit</label><input id="pName" placeholder="Ex. chaussures homme">
+      <div class="row"><div><label for="pCost">Coût d'achat (FCFA)</label><input id="pCost" type="number" min="0" placeholder="4000"></div><div><label for="pSale">Prix de vente (FCFA)</label><input id="pSale" type="number" min="0" placeholder="7500"></div></div>
+      <button class="btn" id="saveProduct">Enregistrer le produit</button>
+      <div id="productList" aria-live="polite"></div>
+      <p class="small">Les produits sont enregistrés uniquement dans le stockage local de ce navigateur. Ils ne sont ni synchronisés ni sauvegardés sur un serveur.</p>
+    </div>
+  </section>
+
+  <section id="assistant" class="panel hidden">
+    <div class="card">
+      <div class="eyebrow">Conseiller commercial guidé</div><h2>Quelques pistes pour mieux vendre</h2>
+      <p class="desc">Réponds à ces questions pour obtenir une petite liste d'actions concrètes. Il s'agit de conseils pré-écrits, pas d'une IA connectée.</p>
+      <label for="goal">Ton objectif principal</label><select id="goal"><option value="clients">Trouver plus de clients</option><option value="convertir">Transformer les demandes en commandes</option><option value="prix">Mieux fixer mes prix</option><option value="fideles">Faire revenir les clients</option></select>
+      <label for="channel">Où vends-tu principalement ?</label><select id="channel"><option>WhatsApp</option><option>Facebook</option><option>TikTok</option><option>En boutique / marché</option></select>
+      <label for="challenge">Ta difficulté actuelle (facultatif)</label><input id="challenge" placeholder="Ex. peu de commandes, beaucoup de négociations">
+      <button class="btn" id="getAdvice">Obtenir mes conseils</button>
+      <div class="result" id="adviceResult" aria-live="polite"></div>
+      <button class="btn secondary hidden" id="copyAdvice">Copier les conseils</button>
+    </div>
+  </section>
+
+  <section id="plan" class="panel hidden">
+    <div class="card">
+      <div class="eyebrow">Feuille de route</div><h2>Construire étape par étape</h2>
+      <p class="desc">Objectif : tester l'utilité auprès de petits commerçants avant d'investir dans des services coûteux.</p>
+      <p><span class="pill">Déjà testé</span><br>Génération de texte modèle et calcul de marge sur téléphone.</p>
+      <p><span class="pill">Version V2</span><br>Catalogue local sur l'appareil, conseils commerciaux guidés et correction de la mise en forme des annonces.</p>
+      <p><span class="pill">Étape suivante</span><br>Faire tester l'outil par 5 à 10 commerçants, recueillir leurs remarques et corriger les problèmes.</p>
+      <div class="notice"><strong>Transparence :</strong> cette version reste un prototype local. Elle n'a pas de véritable IA connectée, pas de comptes utilisateurs, pas de paiement Orange Money, pas de synchronisation ni d'hébergement public. Elle ne génère pas automatiquement de revenus. Ne demande pas d'argent à des clients pour une fonction qui n'existe pas encore.</div>
+    </div>
+  </section>
+</main>
+<footer>VendrePlus Afrique · Prototype local de démonstration · Version 2</footer>
+<script>
+const tabs=[...document.querySelectorAll('.tab')];
+tabs.forEach(t=>t.addEventListener('click',()=>{tabs.forEach(x=>x.classList.toggle('active',x===t));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('hidden',p.id!==t.dataset.tab));}));
+const fmt=n=>new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0}).format(n);
+let currentAd='';
+document.getElementById('generate').addEventListener('click',()=>{
+ const product=document.getElementById('product').value.trim();
+ const price=Number(document.getElementById('price').value);
+ const audience=document.getElementById('audience').value;
+ const benefit=document.getElementById('benefit').value.trim();
+ const contact=document.getElementById('contact').value.trim();
+ const box=document.getElementById('adResult'),copy=document.getElementById('copyAd');
+ if(!product){box.style.display='block';box.textContent='Entre d’abord le nom du produit pour créer ton annonce.';copy.classList.add('hidden');return;}
+ currentAd=`✨ DÉCOUVREZ : ${product.toUpperCase()} ✨\n\n${benefit?benefit+'. ':''}Un choix à découvrir pour ${audience.toLowerCase()}.\n${price>0?'💰 Prix : '+fmt(price)+' FCFA\n':''}${contact?'📦 Infos / commande : '+contact+'\n':''}📩 Écris-nous pour en savoir plus !\n\n#Vente #BonPlan #Afrique`;
+ box.style.display='block';box.textContent=currentAd;copy.classList.remove('hidden');
+});
+async function copyText(text,button){try{await navigator.clipboard.writeText(text);button.textContent='Copié ✓';}catch(e){button.textContent='Copie indisponible : sélectionne le texte';}}
+document.getElementById('copyAd').addEventListener('click',()=>copyText(currentAd,document.getElementById('copyAd')));
+
+document.getElementById('calculate').addEventListener('click',()=>{
+ const costField=document.getElementById('cost').value,saleField=document.getElementById('sale').value;
+ const c=Number(costField),s=Number(saleField),f=Number(document.getElementById('fees').value||0),q=Number(document.getElementById('quantity').value);
+ const box=document.getElementById('marginResult');box.style.display='block';
+ if(costField===''||saleField===''||!Number.isFinite(c)||!Number.isFinite(s)||c<0||s<=0||!Number.isInteger(q)||q<1||f<0){box.textContent='Vérifie les champs : coût et frais positifs ou nuls, prix de vente supérieur à zéro et quantité entière au moins égale à 1.';return;}
+ const unit=s-c-f,total=unit*q,margin=100*unit/s;
+ box.innerHTML=`<strong>Résultat estimé</strong><div class="metrics"><div class="metric"><div class="money">${fmt(unit)} F</div><div class="money-label">Bénéfice par article</div></div><div class="metric"><div class="money">${fmt(total)} F</div><div class="money-label">Bénéfice total estimé</div></div></div><p>Ta marge représente <b>${margin.toLocaleString('fr-FR',{maximumFractionDigits:1})} %</b> du prix de vente. ${unit<0?'Attention : tu vends à perte selon ces chiffres.':'N’oublie pas les taxes et frais non saisis.'}</p>`;
+});
+
+const storageKey='vendreplus_afrique_products_v2';
+function getProducts(){try{return JSON.parse(localStorage.getItem(storageKey)||'[]')}catch(e){return []}}
+function renderProducts(){
+ const list=document.getElementById('productList'),items=getProducts();
+ if(!items.length){list.innerHTML='<p class="small">Aucun produit enregistré pour le moment.</p>';return;}
+ list.innerHTML=items.map((p,i)=>`<div class="product"><div class="product-top"><div><strong>${escapeHtml(p.name)}</strong><small>Coût : ${fmt(p.cost)} F · Vente : ${fmt(p.sale)} F</small><div><b>Bénéfice estimé : ${fmt(p.sale-p.cost)} FCFA / article</b></div></div><button class="delete" data-delete="${i}" type="button">Supprimer</button></div></div>`).join('');
+ list.querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',()=>{const arr=getProducts();arr.splice(Number(b.dataset.delete),1);localStorage.setItem(storageKey,JSON.stringify(arr));renderProducts();}));
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+document.getElementById('saveProduct').addEventListener('click',()=>{
+ const name=document.getElementById('pName').value.trim(),cost=document.getElementById('pCost').value,sale=document.getElementById('pSale').value;
+ if(!name||cost===''||sale===''||Number(cost)<0||Number(sale)<=0){alert('Renseigne le nom, un coût valide et un prix de vente supérieur à zéro.');return;}
+ const items=getProducts();items.push({name,cost:Number(cost),sale:Number(sale)});localStorage.setItem(storageKey,JSON.stringify(items));
+ document.getElementById('pName').value='';document.getElementById('pCost').value='';document.getElementById('pSale').value='';renderProducts();
+});
+renderProducts();
+
+let adviceText='';
+document.getElementById('getAdvice').addEventListener('click',()=>{
+ const goal=document.getElementById('goal').value,channel=document.getElementById('channel').value,challenge=document.getElementById('challenge').value.trim();
+ const plans={
+ clients:['Publie 3 photos ou vidéos nettes du même produit sous des angles différents.','Ajoute le prix, la ville et les conditions de livraison dans chaque publication.','Demande à 3 anciens clients satisfaits de partager ton contact.'],
+ convertir:['Réponds avec un message court : disponibilité, prix total et délai de livraison.','Propose une seule prochaine étape claire : confirmer la commande ou poser une question.','Rassure sans inventer : montre des photos réelles et précise les conditions de retour.'],
+ prix:['Calcule le coût d’achat + transport + emballage + autres frais avant de fixer le prix.','Compare les prix de 3 vendeurs proposant un produit réellement comparable.','Fixe un prix plancher : ne descends pas en dessous de tes coûts et de la marge minimale souhaitée.'],
+ fideles:['Après la vente, demande si le produit convient et remercie le client.','Préviens les anciens clients quand un réassort réel est disponible.','Propose une offre de fidélité simple, dont le coût est inclus dans tes calculs.']
+ };
+ adviceText=`Conseils pour ${channel} :\n\n${plans[goal].map((x,i)=>(i+1)+'. '+x).join('\n')}${challenge?'\n\nTa difficulté : '+challenge+'\nCommence par tester le conseil le plus directement lié à ce problème.':''}\n\nMesure les demandes et les ventes pendant 7 jours pour voir ce qui fonctionne.`;
+ const box=document.getElementById('adviceResult');box.style.display='block';box.textContent=adviceText;document.getElementById('copyAdvice').classList.remove('hidden');
+});
+document.getElementById('copyAdvice').addEventListener('click',()=>copyText(adviceText,document.getElementById('copyAdvice')));
+</script>
+</body>
+</html>

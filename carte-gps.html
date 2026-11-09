@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carte des commerçants - Vente Plus Afrique</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,sans-serif;background:#f4f4f4;color:#222}
+  header{background:#0a7d3b;color:#fff;padding:12px;text-align:center;font-weight:bold;font-size:18px}
+  .bar{display:flex;gap:8px;padding:8px;flex-wrap:wrap;background:#fff}
+  .bar select,.bar button{flex:1 1 45%;padding:10px;font-size:15px;border:1px solid #ccc;border-radius:8px;background:#fff}
+  .bar button{background:#f7a600;border:none;font-weight:bold;color:#222}
+  #map{height:52vh;width:100%}
+  #info{padding:6px 10px;font-size:13px;color:#555}
+  .card{background:#fff;margin:8px;padding:10px;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+  .card h3{margin:0 0 4px;font-size:16px}
+  .card small{color:#666}
+  .card a{display:inline-block;margin-top:6px;margin-right:6px;padding:8px 12px;border-radius:8px;text-decoration:none;color:#fff;background:#25d366;font-size:14px}
+  .card a.go{background:#1a73e8}
+  .badge{background:#0a7d3b;color:#fff;border-radius:6px;padding:1px 6px;font-size:11px;margin-left:4px}
+  .seller{background:#fff;margin:8px;padding:10px;border-radius:10px}
+  .seller button{width:100%;padding:12px;font-size:15px;border:none;border-radius:8px;background:#0a7d3b;color:#fff}
+</style>
+</head>
+<body>
+<header>📍 Commerçants autour de moi</header>
+
+<div class="bar">
+  <select id="zone"></select>
+  <select id="cat"></select>
+  <button id="near">📍 Près de moi</button>
+  <button id="all">Tout voir</button>
+</div>
+
+<div id="map"></div>
+<div id="info">Choisis une zone ou touche « Près de moi ».</div>
+<div id="list"></div>
+
+<div class="seller">
+  <b>Tu es vendeur ?</b><br><small>Mets-toi dans ta boutique, puis touche le bouton. Ta position sera envoyée sur WhatsApp pour ton inscription.</small><br><br>
+  <button id="save">Enregistrer ma boutique ici</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+// ====== À MODIFIER : ton numéro WhatsApp (indicatif 226) ======
+var WHATSAPP_ADMIN = "22606783480";
+
+// ====== Zones de Ouagadougou (coordonnées approximatives, à ajuster) ======
+var ZONES = {
+  "Toutes les zones": {lat:12.3714, lng:-1.5197, z:12},
+  "Pissy":            {lat:12.3290, lng:-1.5760, z:14},
+  "Bonheurville":     {lat:12.3600, lng:-1.4900, z:14},
+  "Ouaga 2000":       {lat:12.2980, lng:-1.4880, z:14},
+  "Zogona":           {lat:12.3950, lng:-1.4900, z:14},
+  "Gounghin":         {lat:12.3700, lng:-1.5500, z:14},
+  "Tampouy":          {lat:12.4150, lng:-1.5450, z:14}
+};
+
+// ====== Commerçants (EXEMPLES : remplace par tes vrais vendeurs) ======
+var VENDEURS = [
+  {nom:"Boutique Mode Awa",     cat:"Mode",         zone:"Pissy",        lat:12.3305, lng:-1.5740, tel:"22670000001", verifie:true},
+  {nom:"Ferme Kaboré",          cat:"Élevage",      zone:"Pissy",        lat:12.3260, lng:-1.5790, tel:"22670000002", verifie:false},
+  {nom:"Alimentation Sawadogo", cat:"Alimentation", zone:"Bonheurville", lat:12.3610, lng:-1.4920, tel:"22670000003", verifie:true},
+  {nom:"Tissus Wend-Panga",     cat:"Mode",         zone:"Zogona",       lat:12.3945, lng:-1.4880, tel:"22670000004", verifie:false},
+  {nom:"Marché Frais Ouaga",    cat:"Alimentation", zone:"Ouaga 2000",   lat:12.2990, lng:-1.4860, tel:"22670000005", verifie:true},
+  {nom:"Élevage Ouédraogo",     cat:"Élevage",      zone:"Tampouy",      lat:12.4140, lng:-1.5430, tel:"22670000006", verifie:false}
+];
+
+var map = L.map('map').setView([12.3714,-1.5197],12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  maxZoom:19, attribution:'© OpenStreetMap'
+}).addTo(map);
+
+var layer = L.layerGroup().addTo(map);
+var me = null, meMarker = null;
+
+var zoneSel = document.getElementById('zone');
+Object.keys(ZONES).forEach(function(z){ zoneSel.add(new Option(z,z)); });
+var catSel = document.getElementById('cat');
+catSel.add(new Option("Toutes catégories","")); 
+["Mode","Alimentation","Élevage"].forEach(function(c){ catSel.add(new Option(c,c)); });
+
+function dist(a,b,c,d){
+  var R=6371,r=Math.PI/180,dLat=(c-a)*r,dLng=(d-b)*r;
+  var x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(a*r)*Math.cos(c*r)*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+
+function show(sortByDistance){
+  layer.clearLayers();
+  var zone = zoneSel.value, cat = catSel.value;
+  var items = VENDEURS.filter(function(v){
+    return (zone==="Toutes les zones" || v.zone===zone) && (!cat || v.cat===cat);
+  }).map(function(v){
+    v.d = me ? dist(me.lat,me.lng,v.lat,v.lng) : null; return v;
+  });
+  if(sortByDistance && me){ items.sort(function(a,b){return a.d-b.d;}); }
+
+  var html = "";
+  items.forEach(function(v){
+    L.marker([v.lat,v.lng]).addTo(layer).bindPopup("<b>"+v.nom+"</b><br>"+v.cat+" - "+v.zone);
+    html += '<div class="card"><h3>'+v.nom+(v.verifie?'<span class="badge">✔ Vérifié</span>':'')+'</h3>'
+      +'<small>'+v.cat+' • '+v.zone+(v.d!==null?' • '+v.d.toFixed(1)+' km':'')+'</small><br>'
+      +'<a href="https://wa.me/'+v.tel+'" target="_blank">WhatsApp</a>'
+      +'<a class="go" href="https://www.google.com/maps/dir/?api=1&destination='+v.lat+','+v.lng+'" target="_blank">Itinéraire</a></div>';
+  });
+  document.getElementById('list').innerHTML = html || '<div class="card">Aucun commerçant trouvé ici.</div>';
+  document.getElementById('info').textContent = items.length+" commerçant(s) trouvé(s)";
+}
+
+zoneSel.onchange = function(){
+  var z = ZONES[zoneSel.value]; map.setView([z.lat,z.lng],z.z); show(false);
+};
+catSel.onchange = function(){ show(!!me); };
+document.getElementById('all').onclick = function(){
+  zoneSel.value="Toutes les zones"; catSel.value=""; map.setView([12.3714,-1.5197],12); show(false);
+};
+
+function locate(cb){
+  if(!navigator.geolocation){ alert("GPS non disponible sur cet appareil."); return; }
+  document.getElementById('info').textContent = "Recherche de ta position…";
+  navigator.geolocation.getCurrentPosition(function(p){
+    me = {lat:p.coords.latitude, lng:p.coords.longitude};
+    if(meMarker) map.removeLayer(meMarker);
+    meMarker = L.circleMarker([me.lat,me.lng],{radius:9,color:'#1a73e8',fillOpacity:.9}).addTo(map).bindPopup("Tu es ici");
+    cb();
+  }, function(){
+    alert("Active la localisation du téléphone et autorise le site à l'utiliser.");
+    document.getElementById('info').textContent = "Position non autorisée.";
+  }, {enableHighAccuracy:true, timeout:15000});
+}
+
+document.getElementById('near').onclick = function(){
+  locate(function(){
+    zoneSel.value="Toutes les zones";
+    map.setView([me.lat,me.lng],14); show(true);
+  });
+};
+
+document.getElementById('save').onclick = function(){
+  locate(function(){
+    var msg = "Bonjour, je veux enregistrer ma boutique sur Vente Plus Afrique.\nMa position GPS : "
+      + me.lat.toFixed(6)+", "+me.lng.toFixed(6)
+      + "\nhttps://www.google.com/maps?q="+me.lat+","+me.lng;
+    window.open("https://wa.me/"+WHATSAPP_ADMIN+"?text="+encodeURIComponent(msg),"_blank");
+  });
+};
+
+show(false);
+</script>
+</body>
+</html>
