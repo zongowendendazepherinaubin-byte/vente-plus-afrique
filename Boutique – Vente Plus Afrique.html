@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Boutique – Vente Plus Afrique</title>
+<style>
+:root{--bg:#fff;--fg:#1a1a1a;--card:#f6f6f6;--bd:#ddd;--accent:#e8590c;--muted:#666;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121212;--fg:#f0f0f0;--card:#1e1e1e;--bd:#3a3a3a;--muted:#aaa}}
+:root[data-theme="dark"]{--bg:#121212;--fg:#f0f0f0;--card:#1e1e1e;--bd:#3a3a3a;--muted:#aaa}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:system-ui,sans-serif;margin:0;padding:16px;max-width:900px;margin:auto}
+h1{text-align:center;margin:0 0 16px}
+h2{margin:28px 0 10px}
+.grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.produit{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;text-align:center}
+.icone{font-size:44px}
+.nom{font-weight:600;margin:6px 0 2px}
+.prix{color:var(--muted);margin-bottom:10px}
+button{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px 12px;font-size:15px;cursor:pointer}
+.produit button{width:100%}
+.filtres{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:14px}
+.filtres button{background:var(--card);color:var(--fg);border:1px solid var(--bd)}
+.filtres button.actif{background:var(--accent);color:#fff;border-color:var(--accent)}
+.vendeur{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;display:grid;gap:10px}
+.vendeur input,.vendeur select{padding:10px;font-size:16px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg)}
+.wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid var(--bd);padding:8px;text-align:center}
+.q{background:#6c757d;padding:3px 10px;font-size:17px;margin:0 5px}
+.r{background:#dc3545;padding:5px 9px;font-size:13px}
+tfoot td{font-weight:bold}
+.act{text-align:center;margin-top:16px}
+.act button{padding:12px 22px;font-size:16px}
+.vide{color:var(--muted);text-align:center;padding:14px}
+</style>
+</head>
+<body>
+<h1>Notre boutique</h1>
+<div class="filtres" id="filtres"></div>
+<div class="grille" id="produits"></div>
+
+<h2>Votre panier</h2>
+<div class="wrap">
+<table>
+<thead><tr><th>Produit</th><th>Prix</th><th>Quantité</th><th>Total</th><th></th></tr></thead>
+<tbody id="contenu-panier"></tbody>
+<tfoot><tr><td colspan="3">Total général</td><td id="total-general">0 F CFA</td><td></td></tr></tfoot>
+</table>
+</div>
+<div class="act"><button onclick="validerCommande()">Valider la commande</button></div>
+
+<h2>Espace vendeur</h2>
+<div class="vendeur">
+<input id="v-nom" type="text" placeholder="Nom du produit ou du service">
+<input id="v-prix" type="number" min="1" placeholder="Prix en F CFA">
+<select id="v-unite"><option>pièce</option><option>kg</option><option>sac</option><option>litre</option><option>tête</option><option>plateau</option><option>heure</option></select>
+<select id="v-cat"><option>Mode</option><option>Alimentation</option><option>Élevage</option><option>Électronique</option><option>Maison</option><option>Beauté</option><option>Artisanat</option><option>Services</option></select>
+<input id="v-icone" type="text" placeholder="Icône (un emoji, facultatif)">
+<button onclick="publierProduit()">Ajouter à la boutique</button>
+</div>
+
+<script>
+const produits = [
+  { id: 1, nom: 'Chaussures Sport', prix: 10000, icone: '👟' },
+  { id: 2, nom: 'Sac à main', prix: 5000, icone: '👜' },
+  { id: 3, nom: 'Robe en wax', prix: 8000, icone: '👗' },
+  { id: 4, nom: 'Écouteurs', prix: 3500, icone: '🎧' },
+  { id: 5, nom: 'Montre', prix: 7500, icone: '⌚' },
+  { id: 6, nom: 'Casquette', prix: 2500, icone: '🧢' }
+];
+produits.push(
+  { id: 7, nom: 'Riz local', prix: 700, unite: 'kg', icone: '🍚', categorie: 'Alimentation' },
+  { id: 8, nom: 'Maïs', prix: 18000, unite: 'sac', icone: '🌽', categorie: 'Alimentation' },
+  { id: 9, nom: 'Tomates', prix: 500, unite: 'kg', icone: '🍅', categorie: 'Alimentation' },
+  { id: 10, nom: 'Œufs', prix: 2500, unite: 'plateau', icone: '🥚', categorie: 'Alimentation' },
+  { id: 11, nom: 'Poulet fermier', prix: 3500, unite: 'tête', icone: '🐔', categorie: 'Élevage' },
+  { id: 12, nom: 'Mouton', prix: 60000, unite: 'tête', icone: '🐑', categorie: 'Élevage' },
+  { id: 13, nom: 'Chèvre', prix: 35000, unite: 'tête', icone: '🐐', categorie: 'Élevage' },
+  { id: 14, nom: 'Aliment pour bétail', prix: 12000, unite: 'sac', icone: '🌾', categorie: 'Élevage' }
+);
+const categories = ['Tous', 'Mode', 'Alimentation', 'Élevage', 'Électronique', 'Maison', 'Beauté', 'Artisanat', 'Services'];
+let categorieActive = 'Tous';
+const panier = [];
+const fcfa = n => n.toLocaleString('fr-FR') + ' F CFA';
+
+function filtrer(c) {
+  categorieActive = c;
+  afficherProduits();
+}
+function afficherProduits() {
+  const f = document.getElementById('filtres');
+  f.innerHTML = '';
+  categories.forEach(c => {
+    const b = document.createElement('button');
+    b.textContent = c;
+    b.className = c === categorieActive ? 'actif' : '';
+    b.onclick = () => filtrer(c);
+    f.appendChild(b);
+  });
+  const g = document.getElementById('produits');
+  g.innerHTML = '';
+  produits.filter(p => categorieActive === 'Tous' || (p.categorie || 'Mode') === categorieActive).forEach(p => {
+    const d = document.createElement('div');
+    d.className = 'produit';
+    d.innerHTML = `<div class="icone">${p.icone}</div><div class="nom">${p.nom}</div><div class="prix">${fcfa(p.prix)}${p.unite ? ' / ' + p.unite : ''}</div><button onclick="ajouter(${p.id})">Ajouter au panier</button>`;
+    g.appendChild(d);
+  });
+}
+function ajouter(id) {
+  const ligne = panier.find(l => l.id === id);
+  if (ligne) { ligne.quantite += 1; }
+  else {
+    const p = produits.find(x => x.id === id);
+    panier.push({ id: p.id, nom: p.nom, prix: p.prix, unite: p.unite, quantite: 1 });
+  }
+  afficherPanier();
+}
+function changerQuantite(id, delta) {
+  const l = panier.find(x => x.id === id);
+  if (!l) return;
+  l.quantite = Math.max(1, l.quantite + delta);
+  afficherPanier();
+}
+function retirer(id) {
+  const i = panier.findIndex(x => x.id === id);
+  if (i !== -1) panier.splice(i, 1);
+  afficherPanier();
+}
+function afficherPanier() {
+  const c = document.getElementById('contenu-panier');
+  c.innerHTML = '';
+  let total = 0;
+  panier.forEach(l => {
+    total += l.prix * l.quantite;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${l.nom}</td><td>${fcfa(l.prix)}${l.unite ? ' / ' + l.unite : ''}</td>` +
+      `<td><button class="q" onclick="changerQuantite(${l.id}, -1)">−</button>${l.quantite}<button class="q" onclick="changerQuantite(${l.id}, 1)">+</button></td>` +
+      `<td>${fcfa(l.prix * l.quantite)}</td>` +
+      `<td><button class="r" onclick="retirer(${l.id})">Retirer</button></td>`;
+    c.appendChild(tr);
+  });
+  if (panier.length === 0) {
+    c.innerHTML = '<tr><td colspan="5" class="vide">Votre panier est vide</td></tr>';
+  }
+  document.getElementById('total-general').textContent = fcfa(total);
+}
+function validerCommande() {
+  if (panier.length === 0) { alert('Votre panier est vide.'); return; }
+  alert('Commande validée !');
+}
+function publierProduit() {
+  const nom = document.getElementById('v-nom').value.trim();
+  const prix = parseInt(document.getElementById('v-prix').value, 10);
+  if (!nom || !(prix > 0)) { alert('Indiquez le nom et un prix valide.'); return; }
+  const unite = document.getElementById('v-unite').value;
+  const categorie = document.getElementById('v-cat').value;
+  const icone = document.getElementById('v-icone').value.trim() || '📦';
+  const id = produits.reduce((m, p) => Math.max(m, p.id), 0) + 1;
+  produits.push({ id, nom, prix, unite, icone, categorie });
+  categorieActive = categorie;
+  afficherProduits();
+  document.getElementById('v-nom').value = '';
+  document.getElementById('v-prix').value = '';
+  document.getElementById('v-icone').value = '';
+  alert('Produit ajouté à la boutique. Pour l’instant il reste visible seulement sur cet écran.');
+}
+afficherProduits();
+afficherPanier();
+</script>
+</body>
+</html>

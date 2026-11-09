@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#08783e">
+<title>Vendeurs près de moi - VendrePlus Afrique</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+:root{--green:#08783e;--green2:#075f32;--gold:#f5a623;--blue:#1769aa;--bg:#f3f6f4;--ink:#18231d;--muted:#66736b;--line:#dce5de}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:linear-gradient(120deg,var(--green2),var(--green));color:#fff;padding:19px 14px;text-align:center}
+header strong{display:block;font-size:21px} header small{display:block;margin-top:6px;opacity:.92}
+main{max-width:1000px;margin:auto}
+.toolbar{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;background:#fff}
+input,select,textarea,button{width:100%;min-height:44px;border:1px solid var(--line);border-radius:9px;padding:10px;font-size:14px;background:#fff;color:var(--ink)}
+button{cursor:pointer;font-weight:700}
+button:disabled{opacity:.55;cursor:not-allowed}
+.btn-gold{background:var(--gold);border-color:var(--gold)}
+.btn-green{background:var(--green);border-color:var(--green);color:white}
+.btn-blue{background:var(--blue);border-color:var(--blue);color:white}
+#search{grid-column:1/-1}
+#map{height:45vh;min-height:290px;width:100%;background:#e5e9e6}
+#status{position:sticky;top:0;z-index:500;padding:10px 13px;color:var(--ink);font-size:13px;font-weight:700;background:#fff8e1;border-bottom:2px solid var(--gold)}
+#list{padding:4px 8px 12px}
+.card,.panel{background:#fff;margin:9px 0;padding:13px;border-radius:12px;box-shadow:0 2px 7px #17251b12}
+.card h3{font-size:16px;margin:0 0 6px}
+.card p{margin:5px 0;color:var(--muted);font-size:13px;line-height:1.45}
+.pill{display:inline-block;background:#e4f4e9;color:var(--green2);font-size:11px;padding:4px 7px;border-radius:20px;margin-left:5px}
+.featured{background:#fff2d8;color:#875400}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.actions a{display:inline-block;text-decoration:none;color:#fff;padding:10px 12px;border-radius:8px;font-size:13px;font-weight:bold}
+.whatsapp{background:#20a85a}.route{background:var(--blue)}
+.panel{margin:12px 8px}
+.panel h2{font-size:17px;margin:0 0 7px}
+.panel p,.note{font-size:13px;color:var(--muted);line-height:1.5}
+.panel button{margin-top:8px}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.full{grid-column:1/-1}
+label{display:block;font-size:12px;font-weight:700;margin:2px 0 5px}
+.empty{text-align:center;color:var(--muted);padding:22px 12px}
+footer{text-align:center;padding:14px;color:var(--muted);font-size:11px}
+.hidden{display:none!important}
+#photoPreview{max-width:130px;max-height:130px;object-fit:cover;border-radius:9px;margin-top:8px}
+.small{font-size:11px;color:var(--muted)}
+@media(min-width:700px){.toolbar{grid-template-columns:1fr 1fr 1.5fr auto auto}#search{grid-column:auto}#map{height:480px}.card{margin:10px 0}.panel{padding:18px}}
+@media(max-width:420px){.formgrid{grid-template-columns:1fr}.full{grid-column:auto}}
+</style>
+</head>
+<body>
+<header>
+  <strong>📍 Vendeurs près de moi</strong>
+  <small>VendrePlus Afrique · Trouve des commerçants autour de toi</small>
+</header>
+<main>
+  <section class="toolbar" aria-label="Recherche et filtres">
+    <input id="search" type="search" placeholder="🔎 Rechercher une boutique ou un produit…" aria-label="Rechercher">
+    <select id="zone" aria-label="Choisir une zone"></select>
+    <select id="cat" aria-label="Choisir une catégorie"></select>
+    <button id="near" class="btn-gold" type="button">📍 Près de moi</button>
+    <button id="all" type="button">Tout voir</button>
+  </section>
+  <div id="map" role="application" aria-label="Carte des commerçants"></div>
+  <div id="status" role="status" aria-live="polite">Choisis une zone ou active ta position pour voir les commerçants proches.</div>
+  <section id="list" aria-live="polite"></section>
+
+  <section class="panel" id="registration">
+    <h2>🏪 Tu es commerçant ? Inscris ta boutique</h2>
+    <p>Remplis les informations ci-dessous. Ta demande sera envoyée à l'administration pour vérification. Elle ne sera pas publiée automatiquement.</p>
+    <form id="sellerForm">
+      <div class="formgrid">
+        <div><label for="shopName">Nom de la boutique *</label><input id="shopName" required maxlength="70" placeholder="Ex. Boutique Awa"></div>
+        <div><label for="shopPhone">Téléphone / WhatsApp *</label><input id="shopPhone" required inputmode="tel" placeholder="Ex. 70 00 00 00"></div>
+        <div><label for="shopCat">Catégorie *</label><select id="shopCat" required><option value="">Choisir</option><option>Mode</option><option>Alimentation</option><option>Élevage</option><option>Électronique</option><option beauté</option><option>Maison</option><option>Services</option><option>Autre</option></select></div>
+        <div><label for="shopZone">Quartier / zone *</label><input id="shopZone" required maxlength="60" placeholder="Ex. Pissy"></div>
+        <div class="full"><label for="shopProducts">Produits ou services proposés</label><textarea id="shopProducts" rows="2" maxlength="300" placeholder="Décris brièvement ce que tu vends…"></textarea></div>
+        <div class="full"><label for="shopPhoto">Photo de la boutique (facultatif)</label><input id="shopPhoto" type="file" accept="image/*"><img id="photoPreview" class="hidden" alt="Aperçu de la photo"></div>
+      </div>
+      <button id="gpsSave" class="btn-blue" type="button">📍 Ajouter ma position GPS</button>
+      <p class="note" id="gpsInfo">La position GPS est nécessaire pour placer ta boutique sur la carte.</p>
+      <button class="btn-green" type="submit">Envoyer ma demande sur WhatsApp</button>
+    </form>
+    <p class="note">Important : la photo est seulement affichée en aperçu dans cette version. Ajoute-la manuellement dans WhatsApp après l'ouverture de la conversation.</p>
+  </section>
+
+  <section class="panel">
+    <h2>⭐ Visibilité commerciale</h2>
+    <p>Une boutique pourra être mise en avant après validation et paiement. Le paiement en ligne et l'activation automatique nécessitent une connexion à un service de paiement et à une base de données sécurisée : ils ne sont pas activés dans cette version de démonstration.</p>
+  </section>
+</main>
+<footer>VendrePlus Afrique · Les positions de démonstration sont fictives. Vérifie les informations avant publication.</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+<script>
+(function(){
+"use strict";
+
+// À remplacer par le numéro WhatsApp officiel de VendrePlus Afrique.
+const WHATSAPP_ADMIN = "22606783480";
+
+const ZONES = {
+  "Toutes les zones": {lat:12.3714,lng:-1.5197,z:12},
+  "Pissy": {lat:12.3290,lng:-1.5760,z:14},
+  "Bonheurville": {lat:12.3600,lng:-1.4900,z:14},
+  "Ouaga 2000": {lat:12.2980,lng:-1.4880,z:14},
+  "Zogona": {lat:12.3950,lng:-1.4900,z:14},
+  "Gounghin": {lat:12.3700,lng:-1.5500,z:14},
+  "Tampouy": {lat:12.4150,lng:-1.5450,z:14}
+};
+
+// EXEMPLES FICTIFS : remplace-les par les commerçants qui ont donné leur accord.
+let VENDEURS = [
+  {id:1,nom:"Boutique Mode Awa",cat:"Mode",zone:"Pissy",lat:12.3305,lng:-1.5740,tel:"22670000001",verifie:true,produits:"Vêtements"},
+  {id:2,nom:"Ferme Kaboré",cat:"Élevage",zone:"Pissy",lat:12.3260,lng:-1.5790,tel:"22670000002",verifie:false,produits:"Volailles"},
+  {id:3,nom:"Alimentation Sawadogo",cat:"Alimentation",zone:"Bonheurville",lat:12.3610,lng:-1.4920,tel:"22670000003",verifie:true,produits:"Produits alimentaires"},
+  {id:4,nom:"Tissus Wend-Panga",cat:"Mode",zone:"Zogona",lat:12.3945,lng:-1.4880,tel:"22670000004",verifie:false,produits:"Pagnes et tissus"},
+  {id:5,nom:"Marché Frais Ouaga",cat:"Alimentation",zone:"Ouaga 2000",lat:12.2990,lng:-1.4860,tel:"22670000005",verifie:true,produits:"Fruits et légumes"},
+  {id:6,nom:"Élevage Ouédraogo",cat:"Élevage",zone:"Tampouy",lat:12.4140,lng:-1.5430,tel:"22670000006",verifie:false,produits:"Élevage"}
+];async function chargerVendeurs(){
+  try{
+    const sb = window.supabase.createClient("TON_URL_SUPABASE","TA_CLE_ANON");
+    const {data,error} = await sb.from("vendeurs")
+      .select("*").eq("actif",true).not("latitude","is",null);
+    if(error){console.error(error);return;}
+    if(data && data.length){
+      VENDEURS = data.map(v=>({
+        id:v.id, nom:v.nom, cat:v.categorie, zone:v.zone,
+        lat:v.latitude, lng:v.longitude, tel:v.whatsapp, verifie:v.verifie
+      }));
+    }
+  }catch(e){console.error(e);}
+}
+
+const $=id=>document.getElementById(id);
+const statusEl=$("status"),listEl=$("list"),zoneSel=$("zone"),catSel=$("cat");
+let me=null,meMarker=null,map=null,markers=null,photoDataPresent=false;
+
+function setStatus(message){statusEl.textContent=message;}
+function distanceKm(a,b,c,d){
+  const rad=Math.PI/180,R=6371,dLat=(c-a)*rad,dLng=(d-b)*rad;
+  const x=Math.sin(dLat/2)**2+Math.cos(a*rad)*Math.cos(c*rad)*Math.sin(dLng/2)**2;
+  return 2*R*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+function validSeller(v){return Number.isFinite(v.lat)&&Number.isFinite(v.lng)&&v.lat>=-90&&v.lat<=90&&v.lng>=-180&&v.lng<=180;}
+function initMap(){
+  if(!window.L){setStatus("La carte ne s'est pas chargée. Vérifie Internet puis actualise la page.");return false;}
+  map=L.map("map").setView([12.3714,-1.5197],12);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(map);
+  markers=L.layerGroup().addTo(map);
+  setTimeout(()=>map.invalidateSize(),300);
+  return true;
+}
+function fillFilters(){
+  Object.keys(ZONES).forEach(z=>zoneSel.add(new Option(z,z)));
+  catSel.add(new Option("Toutes catégories",""));
+  ["Mode","Alimentation","Élevage","Électronique","Beauté","Maison","Services","Autre"].forEach(c=>catSel.add(new Option(c,c)));
+}
+function render(sortByDistance){
+  if(!map||!markers)return;
+  markers.clearLayers();listEl.innerHTML="";
+  const zone=zoneSel.value,cat=catSel.value,query=$("search").value.trim().toLocaleLowerCase("fr");
+  let items=VENDEURS.filter(v=>validSeller(v)&&
+    (zone==="Toutes les zones"||v.zone===zone)&&(!cat||v.cat.toLocaleLowerCase("fr")===cat.toLocaleLowerCase("fr"))&&
+    (!query||[v.nom,v.cat,v.zone,v.produits||""].join(" ").toLocaleLowerCase("fr").includes(query))
+  ).map(v=>({...v,d:me?distanceKm(me.lat,me.lng,v.lat,v.lng):null}));
+  if(sortByDistance&&me)items.sort((a,b)=>a.d-b.d);
+  items.forEach(v=>{
+    const marker=L.marker([v.lat,v.lng]).addTo(markers);
+    marker.bindPopup("<strong>"+String(v.nom).replace(/[&<>"]/g,"")+"</strong><br>"+String(v.cat)+" · "+String(v.zone));
+    const card=document.createElement("article");card.className="card";
+    const title=document.createElement("h3");title.textContent=v.nom;
+    const badge=document.createElement("span");badge.className="pill";badge.textContent=v.verifie?"✔ Vérifié":"À vérifier";title.appendChild(badge);
+    const detail=document.createElement("p");detail.textContent=v.cat+" · "+v.zone+(v.d!==null?" · "+v.d.toFixed(1)+" km":"");
+    const products=document.createElement("p");products.textContent=v.produits||"Produits non précisés";
+    const actions=document.createElement("div");actions.className="actions";
+    const phone=String(v.tel||"").replace(/[^\d]/g,"");
+    if(phone){const wa=document.createElement("a");wa.className="whatsapp";wa.href="https://wa.me/"+phone;wa.target="_blank";wa.rel="noopener noreferrer";wa.textContent="WhatsApp";actions.appendChild(wa);}
+    const go=document.createElement("a");go.className="route";go.href="https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(v.lat+","+v.lng);go.target="_blank";go.rel="noopener noreferrer";go.textContent="Itinéraire";actions.appendChild(go);
+    card.append(title,detail,products,actions);listEl.appendChild(card);
+    marker.on("click",()=>{card.scrollIntoView({behavior:"smooth",block:"nearest"});});
+  });
+  if(!items.length){const empty=document.createElement("div");empty.className="card empty";empty.textContent="Aucun commerçant trouvé avec cette recherche et ces filtres.";listEl.appendChild(empty);}
+  setStatus(items.length+" commerçant(s) trouvé(s)"+(me&&sortByDistance?" · triés par proximité":""));
+}
+function locate(callback){
+  if(!window.isSecureContext && location.hostname!=="localhost" && location.hostname!=="127.0.0.1"){
+    setStatus("Le GPS exige une page sécurisée HTTPS. Ouvre la version publiée sur Netlify dans Chrome.");
+    $("gpsInfo").textContent="GPS indisponible : utilise la page HTTPS publiée, pas un aperçu local.";
+    return;
+  }
+  if(!navigator.geolocation){setStatus("La géolocalisation n'est pas disponible dans ce navigateur.");return;}
+  setStatus("Recherche de ta position GPS… Autorise la localisation si Chrome le demande.");
+  navigator.geolocation.getCurrentPosition(pos=>{
+    me={lat:pos.coords.latitude,lng:pos.coords.longitude};
+    if(meMarker)map.removeLayer(meMarker);
+    meMarker=L.circleMarker([me.lat,me.lng],{radius:9,color:"#1769aa",fillColor:"#1769aa",fillOpacity:.9}).addTo(map).bindPopup("Ta position");
+    $("gpsInfo").textContent="Position GPS ajoutée : "+me.lat.toFixed(5)+", "+me.lng.toFixed(5);
+    callback();
+  },err=>{
+    let msg="Impossible d'obtenir ta position. Vérifie le GPS et l'autorisation de localisation de Chrome.";
+    if(err.code===1)msg="Autorisation refusée : dans Chrome, autorise la localisation pour ce site.";
+    if(err.code===2)msg="Position introuvable : active le GPS et réessaie près d'une fenêtre ou dehors.";
+    if(err.code===3)msg="Le GPS met trop de temps. Active la localisation précise et réessaie.";
+    setStatus(msg);$("gpsInfo").textContent=msg;
+  },{enableHighAccuracy:true,timeout:30000,maximumAge:0});
+}
+chargerVendeurs().then(function(){
+  fillFilters();
+  if(initMap())render(false);
+});
+
+$("search").addEventListener("input",()=>render(!!me));
+$("all").addEventListener("click",()=>{zoneSel.value="Toutes les zones";catSel.value="";$("search").value="";map.setView([12.3714,-1.5197],12);render(false);});
+$("near").addEventListener("click",()=>locate(()=>{zoneSel.value="Toutes les zones";map.setView([me.lat,me.lng],15);render(true);}));
+$("gpsSave").addEventListener("click",()=>locate(()=>setStatus("Position ajoutée au formulaire. Tu peux maintenant envoyer ta demande.")));
+$("shopPhoto").addEventListener("change",e=>{
+  const file=e.target.files&&e.target.files[0];if(!file)return;
+  if(!file.type.startsWith("image/")){setStatus("Choisis un fichier image.");e.target.value="";return;}
+  const reader=new FileReader();reader.onload=()=>{$("photoPreview").src=reader.result;$("photoPreview").classList.remove("hidden");};reader.readAsDataURL(file);
+});
+$("sellerForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  if(!/^\d{8,15}$/.test(WHATSAPP_ADMIN)){setStatus("Le numéro WhatsApp de l'administration doit être corrigé dans le code.");return;}
+  if(!me){setStatus("Ajoute d'abord ta position GPS avec le bouton bleu.");return;}
+  const name=$("shopName").value.trim(),phone=$("shopPhone").value.trim(),cat=$("shopCat").value,zone=$("shopZone").value.trim(),products=$("shopProducts").value.trim();
+  const msg="Bonjour, je souhaite inscrire ma boutique sur VendrePlus Afrique.\n\nNom : "+name+"\nTéléphone : "+phone+"\nCatégorie : "+cat+"\nQuartier : "+zone+"\nProduits/services : "+(products||"Non précisés")+"\nPosition GPS : "+me.lat.toFixed(6)+", "+me.lng.toFixed(6)+"\nCarte : https://www.google.com/maps?q="+me.lat+","+me.lng+"\n\nMerci de vérifier ma demande.";
+  window.open("https://wa.me/"+WHATSAPP_ADMIN+"?text="+encodeURIComponent(msg),"_blank","noopener,noreferrer");
+  setStatus("La demande est préparée. Vérifie le message dans WhatsApp et joins la photo manuellement si nécessaire.");
+});
+
+chargerVendeurs().then(function(){
+  fillFilters();
+  if(initMap())render(false);
+});
+})();
+</script>
+</body>
+</html>

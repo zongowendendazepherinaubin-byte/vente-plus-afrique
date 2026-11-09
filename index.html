@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#123c32">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="description" content="Outils simples pour préparer des annonces commerciales et calculer ses marges.">
+<title>VendrePlus Afrique — Prototype</title>
+<style>
+:root{--green:#123c32;--green2:#1e6b50;--lime:#d8f36a;--cream:#f7f5ed;--ink:#18231f;--muted:#68736e;--line:#e3e7df;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:var(--green);color:white;padding:22px 18px 26px;border-radius:0 0 26px 26px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px}.logo{font-weight:850;font-size:19px;letter-spacing:-.4px}.logo span{color:var(--lime)}.tag{font-size:11px;border:1px solid #ffffff55;border-radius:20px;padding:6px 9px;color:#e9f4ed}
+h1{font-size:27px;line-height:1.13;letter-spacing:-.8px;margin:26px 0 9px;max-width:380px}header p{color:#d7e4dd;font-size:14px;line-height:1.5;margin:0;max-width:420px}
+main{max-width:720px;margin:auto;padding:18px 14px 40px}.tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}.tab{border:1px solid var(--line);background:white;border-radius:13px;padding:11px 5px;font-size:12px;font-weight:750;color:var(--muted)}.tab.active{background:var(--lime);color:var(--green);border-color:var(--lime)}
+.card{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px;box-shadow:0 4px 18px #122d1b08}.eyebrow{text-transform:uppercase;letter-spacing:1px;color:var(--green2);font-size:10px;font-weight:850}.card h2{font-size:19px;margin:6px 0 6px;letter-spacing:-.4px}.desc{font-size:13px;color:var(--muted);line-height:1.5;margin:0 0 15px}
+label{display:block;font-size:12px;font-weight:750;margin:12px 0 6px}input,select,textarea{width:100%;border:1px solid #dce3da;border-radius:11px;padding:12px;font:inherit;font-size:14px;background:#fff;color:var(--ink)}textarea{min-height:86px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{width:100%;border:0;border-radius:12px;padding:13px 14px;font:inherit;font-weight:800;background:var(--green);color:#fff;margin-top:14px;cursor:pointer}.btn.secondary{background:#edf3e9;color:var(--green);border:1px solid #dce8d9}.result{background:#f4f8ee;border:1px solid #dce9d3;border-radius:13px;padding:13px;margin-top:14px;white-space:pre-wrap;font-size:14px;line-height:1.55;display:none}.result strong{display:block;margin-bottom:6px}.small{font-size:11px;color:var(--muted);line-height:1.5}.money{font-size:27px;font-weight:850;letter-spacing:-.7px}.money-label{font-size:12px;color:var(--muted)}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.metric{background:#f7f8f3;border-radius:13px;padding:13px}.hidden{display:none!important}.notice{font-size:12px;background:#fff7df;border:1px solid #f1dfaa;border-radius:12px;padding:12px;line-height:1.5;color:#5d4a19}.pill{display:inline-block;background:#edf5e7;color:#28563c;border-radius:20px;padding:5px 8px;font-size:10px;font-weight:800;margin-bottom:6px}footer{text-align:center;padding:8px 18px 28px;color:var(--muted);font-size:11px}
+@media(min-width:600px){header{padding:28px max(24px,calc((100vw - 680px)/2)) 32px}h1{font-size:34px}main{padding-top:24px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="top"><div class="logo">VendrePlus <span>Afrique</span></div><div class="tag">PROTOYPE • V1</div></div>
+  <h1>Vends mieux. Garde le contrôle de tes bénéfices.</h1>
+  <p>Des outils simples pour préparer tes annonces et comprendre tes marges — directement sur ton téléphone.</p>
+</header>
+<main>
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="annonce">✍️ Annonce</button>
+    <button class="tab" data-tab="marge">💰 Ma marge</button>
+    <button class="tab" data-tab="plan">🌍 Le projet</button>
+  </div>
+  <section id="annonce" class="panel">
+    <div class="card">
+      <div class="eyebrow">Assistant de vente</div><h2>Prépare une annonce</h2>
+      <p class="desc">Renseigne quelques détails et obtiens un texte que tu peux copier vers WhatsApp, Facebook ou TikTok.</p>
+      <label for="product">Nom du produit</label><input id="product" placeholder="Ex. chaussures, jus naturel, pagne">
+      <div class="row"><div><label for="price">Prix (FCFA)</label><input id="price" type="number" min="0" placeholder="Ex. 7500"></div><div><label for="audience">Clientèle</label><select id="audience"><option>Tout public</option><option>Femmes</option><option>Hommes</option><option>Jeunes</option><option>Parents</option><option>Professionnels</option></select></div></div>
+      <label for="benefit">Avantage principal</label><input id="benefit" placeholder="Ex. confortable, durable, fait localement">
+      <label for="contact">Contact ou livraison (facultatif)</label><input id="contact" placeholder="Ex. livraison à Ouaga, WhatsApp…">
+      <button class="btn" id="generate">Créer mon annonce</button>
+      <div class="result" id="adResult" aria-live="polite"></div>
+      <button class="btn secondary hidden" id="copyAd">Copier l'annonce</button>
+      <p class="small">Note : cette version de démonstration utilise un modèle local, pas encore une IA connectée. Elle ne publie rien automatiquement.</p>
+    </div>
+  </section>
+  <section id="marge" class="panel hidden">
+    <div class="card">
+      <div class="eyebrow">Calculateur</div><h2>Calcule ton bénéfice</h2>
+      <p class="desc">Ajoute le coût d'achat et les autres frais pour estimer ce qu'il te reste sur chaque vente.</p>
+      <label for="cost">Coût d'achat (FCFA)</label><input id="cost" type="number" min="0" placeholder="Ex. 4000">
+      <div class="row"><div><label for="sale">Prix de vente (FCFA)</label><input id="sale" type="number" min="0" placeholder="Ex. 6500"></div><div><label for="fees">Autres frais (FCFA)</label><input id="fees" type="number" min="0" value="0"></div></div>
+      <label for="quantity">Nombre d'articles vendus</label><input id="quantity" type="number" min="1" value="1">
+      <button class="btn" id="calculate">Calculer ma marge</button>
+      <div class="result" id="marginResult" aria-live="polite"></div>
+    </div>
+  </section>
+  <section id="plan" class="panel hidden">
+    <div class="card">
+      <div class="eyebrow">Notre feuille de route</div><h2>Construire étape par étape</h2>
+      <p class="desc">L'objectif est de commencer petit, tester l'utilité, puis élargir progressivement à l'Afrique francophone.</p>
+      <p><span class="pill">Étape 1 · Prototype</span><br>Tester la création d'annonces et le calcul des marges sur téléphone.</p>
+      <p><span class="pill">Étape 2 · Validation</span><br>Demander à quelques commerçants ce qui leur serait vraiment utile et améliorer l'outil.</p>
+      <p><span class="pill">Étape 3 · Version en ligne</span><br>Ajouter une vraie IA, un hébergement fiable, des comptes et la protection des données.</p>
+      <p><span class="pill">Étape 4 · Revenus</span><br>Tester une offre gratuite et une offre premium, puis vérifier les conditions de paiement dans chaque pays.</p>
+      <div class="notice"><strong>Important :</strong> cette maquette n'est pas encore publiée sur Internet, ne collecte aucun paiement et ne garantit aucun revenu. Ne dépense pas pour une entreprise ou des publicités avant d'avoir testé l'intérêt de vrais utilisateurs.</div>
+    </div>
+  </section>
+</main>
+<footer>VendrePlus Afrique · Prototype de démonstration · Version 1</footer>
+<script>
+const tabs=[...document.querySelectorAll('.tab')];
+tabs.forEach(t=>t.addEventListener('click',()=>{tabs.forEach(x=>x.classList.toggle('active',x===t));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('hidden',p.id!==t.dataset.tab));}));
+let currentAd='';
+const fmt=n=>new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0}).format(n);
+document.getElementById('generate').addEventListener('click',()=>{
+ const product=document.getElementById('product').value.trim();
+ const price=Number(document.getElementById('price').value);
+ const audience=document.getElementById('audience').value;
+ const benefit=document.getElementById('benefit').value.trim();
+ const contact=document.getElementById('contact').value.trim();
+ const box=document.getElementById('adResult'),copy=document.getElementById('copyAd');
+ if(!product){box.style.display='block';box.textContent='Entre d’abord le nom du produit pour créer ton annonce.';copy.classList.add('hidden');return;}
+ currentAd=`✨ DÉCOUVREZ : ${product.toUpperCase()} ✨\n\n${benefit?benefit+'. ':''}Un choix à découvrir pour ${audience.toLowerCase()}.\n${price>0?'💰 Prix : '+fmt(price)+' FCFA\\n':''}${contact?'📦 Infos / commande : '+contact+'\\n':''}\n📩 Écris-nous pour en savoir plus !\n\n#Vente #BonPlan #Afrique`;
+ box.style.display='block';box.textContent=currentAd;copy.classList.remove('hidden');
+});
+document.getElementById('copyAd').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(currentAd);document.getElementById('copyAd').textContent='Copié ✓';}catch(e){const r=document.getElementById('adResult');const ta=document.createElement('textarea');ta.value=currentAd;r.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();document.getElementById('copyAd').textContent='Copié ✓';}});
+document.getElementById('calculate').addEventListener('click',()=>{
+ const c=Number(document.getElementById('cost').value),s=Number(document.getElementById('sale').value),f=Number(document.getElementById('fees').value)||0,q=Math.max(1,Number(document.getElementById('quantity').value)||1);
+ const box=document.getElementById('marginResult');box.style.display='block';
+ if(c<0||s<=0||c===0){box.textContent='Renseigne un coût d’achat et un prix de vente valides.';return;}
+ const profit=s-c-f, total=profit*q, margin=s>0?(profit/s)*100:0;
+ box.innerHTML=`<strong>Résultat estimé</strong><div class="metrics"><div class="metric"><div class="money">${fmt(profit)} F</div><div class="money-label">Bénéfice par article</div></div><div class="metric"><div class="money">${fmt(total)} F</div><div class="money-label">Bénéfice total estimé</div></div></div><p>Ta marge représente environ <b>${margin.toLocaleString('fr-FR',{maximumFractionDigits:1})} %</b> du prix de vente. ${profit<0?'Attention : tu perds de l’argent sur chaque article avec ces chiffres.':'Pense aussi aux frais qui auraient été oubliés.'}</p>`;
+});
+</script>
+<script>
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {})); }
+</script>
+</body>
+</html>
